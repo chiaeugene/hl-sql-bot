@@ -1,0 +1,33 @@
+# Render Blueprint for Hock Lee Invoice -> SQL
+# Persistent disk keeps the SQLite DB + uploaded invoices across deploys.
+# NOTE: persistent disks require a paid instance (Starter); free web services
+# have ephemeral storage and would reset data on every deploy/sleep.
+services:
+  - type: web
+    name: hl-sql-bot
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    # migrate deploy is additive/safe; it creates the DB on first deploy.
+    # Seeding is a ONE-TIME manual step (see README) so learned aliases aren't wiped.
+    preDeployCommand: npx prisma migrate deploy
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:/var/data/dev.db
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      - key: ANTHROPIC_MODEL
+        value: claude-opus-4-8
+      - key: SESSION_SECRET
+        generateValue: true # Render generates a strong random secret
+      - key: APP_PASSWORD
+        sync: false # set in the Render dashboard (not committed)
+      - key: ANTHROPIC_API_KEY
+        sync: false # set in the Render dashboard (not committed)

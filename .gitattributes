@@ -1,0 +1,11 @@
+# Normalize line endings to LF on commit (important for Render/Linux deployment)
+* text=auto eol=lf
+*.bat text eol=crlf
+*.xlsx binary
+*.pdf  binary
+*.ico  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.svg  text

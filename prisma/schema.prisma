@@ -1,0 +1,95 @@
+// Hock Lee Invoice -> SQL tool schema
+// Local dev uses SQLite. For Vercel/Postgres deploy, change datasource provider
+// to "postgresql" and DATABASE_URL accordingly.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// A fish supplier (one Excel sheet in HL SUPPLIER MASTER.xlsx)
+model Supplier {
+  id        String          @id @default(cuid())
+  name      String          @unique
+  aliases   SupplierAlias[]
+  items     SupplierItem[]
+  invoices  Invoice[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+// Header text / alternate names used to auto-detect a supplier from an invoice
+model SupplierAlias {
+  id         String   @id @default(cuid())
+  supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  supplierId String
+  text       String
+
+  @@index([supplierId])
+}
+
+// One row from a supplier sheet: ITEM CODE | DESCRIPTION
+model SupplierItem {
+  id          String      @id @default(cuid())
+  supplier    Supplier    @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  supplierId  String
+  code        String
+  description String
+  aliases     ItemAlias[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([supplierId])
+}
+
+// LEARNING: a piece of raw invoice wording that maps to a SupplierItem.
+// Normalized text is stored so repeat wording auto-matches next time.
+model ItemAlias {
+  id             String       @id @default(cuid())
+  supplierItem   SupplierItem @relation(fields: [supplierItemId], references: [id], onDelete: Cascade)
+  supplierItemId String
+  rawText        String // normalized invoice wording
+  source         String       @default("correction") // correction | ai | seed
+  createdAt      DateTime     @default(now())
+
+  @@unique([supplierItemId, rawText])
+  @@index([rawText])
+}
+
+// An uploaded invoice and its AI parse
+model Invoice {
+  id         String        @id @default(cuid())
+  supplier   Supplier?     @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  supplierId String?
+  fileUrl    String? // stored upload (Blob URL or local path)
+  fileName   String?
+  status     String        @default("parsed") // parsed | reviewed | exported
+  rawAiJson  String? // raw model output for auditing/improvement
+  createdBy  String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  lines      InvoiceLine[]
+}
+
+model InvoiceLine {
+  id              String  @id @default(cuid())
+  invoice         Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoiceId       String
+  position        Int     @default(0)
+  rawDescription  String
+  matchedCode     String? // resolved Hock Lee item code
+  matchedItemId   String? // SupplierItem.id if matched
+  qty             Float   @default(0)
+  uom             String  @default("KG")
+  unitPrice       Float   @default(0)
+  subtotal        Float   @default(0)
+  matchConfidence Float   @default(0) // 0..1
+  matchMethod     String  @default("none") // alias | fuzzy | ai | manual | none
+  wasEdited       Boolean @default(false)
+
+  @@index([invoiceId])
+}

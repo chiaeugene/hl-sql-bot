@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/* Hock Lee — aurora theme (glass UI over a flowing aurora) */
+:root {
+  --background: #f6f9fc;
+  --foreground: #0b1f2a;
+
+  --primary: #0c2231; /* deep navy */
+  --on-primary: #ffffff;
+  --secondary: #334155;
+  --accent: #0891b2; /* cyan — key CTAs */
+  --accent-hover: #0e7490;
+  --muted: #e2ecf1;
+  --border: #d7e3ea;
+  --destructive: #e11d48;
+  --ring: #0891b2;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-muted: var(--muted);
+  --color-line: var(--border);
+  --color-destructive: var(--destructive);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, Arial, sans-serif;
+}
+
+/* Tabular figures keep numeric columns aligned. */
+.nums {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ---------- Frosted-glass surfaces ---------- */
+.glass {
+  background: color-mix(in srgb, white 78%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid color-mix(in srgb, white 60%, transparent);
+  box-shadow: 0 10px 30px -12px rgba(8, 47, 73, 0.25);
+}
+.glass-solid {
+  background: color-mix(in srgb, white 92%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px -14px rgba(8, 47, 73, 0.25);
+}
+
+/* ---------- Flowing aurora background ---------- */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  background: var(--background);
+}
+.aurora {
+  position: absolute;
+  inset: -30%;
+  background-image: repeating-linear-gradient(
+    100deg,
+    #22d3ee  8%,
+    #6366f1 15%,
+    #38bdf8 22%,
+    #a78bfa 29%,
+    #2dd4bf 36%
+  );
+  background-size: 300% 200%;
+  background-position: 0% 50%;
+  filter: blur(22px) saturate(130%);
+  opacity: 0.45;
+  /* mask sits at 15% from top so the glow is visible mid-screen */
+  mask-image: radial-gradient(130% 80% at 50% 15%, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(130% 80% at 50% 15%, black 30%, transparent 70%);
+  will-change: transform, background-position;
+  /* linear = constant speed, always visibly moving from the first frame */
+  animation: aurora-flow 40s linear infinite;
+}
+/* Second layer — reverse direction for depth + shimmer. */
+.aurora--2 {
+  mix-blend-mode: screen;
+  opacity: 0.32;
+  filter: blur(34px) saturate(120%) hue-rotate(40deg);
+  animation: aurora-flow-r 58s linear infinite;
+}
+
+/* Looping keyframe: 0% and 100% share the same position so the loop is seamless */
+@keyframes aurora-flow {
+  0%   { background-position:   0% 50%; transform: translate3d(-4%,  1%, 0) rotate(-1deg); }
+  25%  { background-position:  75% 30%; transform: translate3d( 2%, -1%, 0) rotate( 2deg); }
+  50%  { background-position: 200% 50%; transform: translate3d( 4%,  2%, 0) rotate(-1deg); }
+  75%  { background-position:  75% 70%; transform: translate3d(-1%, -2%, 0) rotate( 1deg); }
+  100% { background-position:   0% 50%; transform: translate3d(-4%,  1%, 0) rotate(-1deg); }
+}
+@keyframes aurora-flow-r {
+  0%   { background-position: 200% 50%; transform: translate3d( 4%, -1%, 0) rotate( 1deg); }
+  25%  { background-position:  75% 70%; transform: translate3d(-2%,  2%, 0) rotate(-2deg); }
+  50%  { background-position:   0% 50%; transform: translate3d(-4%,  1%, 0) rotate( 1deg); }
+  75%  { background-position:  75% 30%; transform: translate3d( 2%, -1%, 0) rotate(-1deg); }
+  100% { background-position: 200% 50%; transform: translate3d( 4%, -1%, 0) rotate( 1deg); }
+}
+
+/* Aurora intentionally always runs — it's a key visual of this internal business app.
+   UI component transitions are kept short so they remain accessible by default. */
