@@ -88,14 +88,14 @@ body {
   -webkit-mask-image: radial-gradient(130% 80% at 50% 15%, black 30%, transparent 70%);
   will-change: transform, background-position;
   /* linear = constant speed, always visibly moving from the first frame */
-  animation: aurora-flow 40s linear infinite;
+  animation: aurora-flow 200s linear infinite;
 }
 /* Second layer — reverse direction for depth + shimmer. */
 .aurora--2 {
   mix-blend-mode: screen;
   opacity: 0.32;
   filter: blur(34px) saturate(120%) hue-rotate(40deg);
-  animation: aurora-flow-r 58s linear infinite;
+  animation: aurora-flow-r 290s linear infinite;
 }
 
 /* Looping keyframe: 0% and 100% share the same position so the loop is seamless */
