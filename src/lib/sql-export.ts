@@ -39,13 +39,11 @@ export function toRow(line: ExportLine): (string | number)[] {
   ];
 }
 
-/** Tab-separated text (header + rows) for paste into SQL Account. */
+/** Tab-separated rows (NO header) for paste into SQL Account. */
 export function toTSV(lines: ExportLine[]): string {
-  const head = SQL_COLUMNS.join("\t");
-  const body = lines
+  return lines
     .map((l) => toRow(l).map((c) => String(c)).join("\t"))
     .join("\n");
-  return `${head}\n${body}`;
 }
 
 /** Array-of-arrays (header + rows) for SheetJS aoa_to_sheet. */

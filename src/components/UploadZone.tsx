@@ -46,10 +46,12 @@ export default function UploadZone() {
 
     if (ids.length > 0) {
       setUploadState({ phase: "done", total: ids.length });
-      const [first, ...rest] = ids;
-      // Encode all IDs in the batch param so any page knows its position + total.
-      const batchParam = ids.length > 1 ? `?batch=${ids.join(",")}` : "";
-      router.push(`/invoice/${first}${batchParam}`);
+      if (ids.length === 1) {
+        router.push(`/invoice/${ids[0]}`);
+      } else {
+        // Multiple invoices → batch view (all on one page for easy copy-paste)
+        router.push(`/batch?ids=${ids.join(",")}`);
+      }
     }
   }
 

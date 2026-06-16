@@ -11,6 +11,7 @@ import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import AppShell from "@/components/AppShell";
 import UploadZone from "@/components/UploadZone";
+import ClickableRow from "@/components/ClickableRow";
 
 export const dynamic = "force-dynamic";
 
@@ -186,17 +187,13 @@ export default async function DashboardPage({
               </tr>
             )}
             {invoices.map((inv) => (
-              <tr
+              <ClickableRow
                 key={inv.id}
+                href={`/invoice/${inv.id}`}
                 className="group border-b border-white/40 transition-colors last:border-0 hover:bg-white/50"
               >
-                <td className="px-5 py-3">
-                  <Link
-                    href={`/invoice/${inv.id}`}
-                    className="font-medium text-[var(--accent-hover)] hover:underline"
-                  >
-                    {inv.fileName || "invoice"}
-                  </Link>
+                <td className="px-5 py-3 font-medium text-[var(--accent-hover)]">
+                  {inv.fileName || "invoice"}
                 </td>
                 <td className="px-5 py-3 text-slate-700">
                   {inv.supplier?.name || (
@@ -213,14 +210,9 @@ export default async function DashboardPage({
                   {inv.createdAt.toLocaleDateString()}
                 </td>
                 <td className="px-3 py-3 text-right">
-                  <Link
-                    href={`/invoice/${inv.id}`}
-                    className="inline-flex text-slate-300 transition-colors group-hover:text-[var(--accent)]"
-                  >
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  <ArrowRight className="h-4 w-4 text-slate-300 transition-colors group-hover:text-[var(--accent)]" />
                 </td>
-              </tr>
+              </ClickableRow>
             ))}
           </tbody>
         </table>

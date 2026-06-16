@@ -208,7 +208,14 @@ export default function InvoiceEditor({
 
   async function downloadXlsx() {
     const XLSX = await import("xlsx");
-    const ws = XLSX.utils.aoa_to_sheet(toAoA(exportLines()));
+    const aoa = toAoA(exportLines());
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    // Force item-code column (col 0) to text so Excel preserves leading zeros.
+    const range = XLSX.utils.decode_range(ws["!ref"] ?? "A1");
+    for (let r = 1; r <= range.e.r; r++) {
+      const ref = XLSX.utils.encode_cell({ r, c: 0 });
+      if (ws[ref]) { ws[ref].t = "s"; ws[ref].z = "@"; }
+    }
     const wb = XLSX.utils.book_new();
     const supplierName =
       suppliers.find((s) => s.id === supplierId)?.name || "INVOICE";
