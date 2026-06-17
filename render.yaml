@@ -1,7 +1,6 @@
 # Render Blueprint for Hock Lee Invoice -> SQL
-# Free tier: no persistent disk — DB and uploads live in the app directory.
-# Data survives sleep/wake cycles but resets on each new deploy.
-# When ready for production, add plan: starter + disk section for persistence.
+# Data lives in Supabase (Postgres + Storage), so it persists across deploys.
+# On each deploy: install, build, apply DB migrations, then seed the master data.
 services:
   - type: web
     name: hl-sql-bot
@@ -12,13 +11,20 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
-        value: file:./prisma/prod.db
       - key: ANTHROPIC_MODEL
         value: claude-opus-4-8
+      - key: SUPABASE_BUCKET
+        value: invoices
       - key: SESSION_SECRET
         generateValue: true
+      # --- Secrets: set these in the Render dashboard (sync: false) ---
+      - key: DATABASE_URL # Supabase Session-pooler URI (port 5432, IPv4)
+        sync: false
+      - key: SUPABASE_URL # https://<ref>.supabase.co
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY # Supabase service_role key
+        sync: false
       - key: APP_PASSWORD
-        sync: false # set in the Render dashboard
+        sync: false
       - key: ANTHROPIC_API_KEY
-        sync: false # set in the Render dashboard
+        sync: false

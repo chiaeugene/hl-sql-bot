@@ -1,6 +1,6 @@
 // Hock Lee Invoice -> SQL tool schema
-// Local dev uses SQLite. For Vercel/Postgres deploy, change datasource provider
-// to "postgresql" and DATABASE_URL accordingly.
+// Production: Supabase Postgres. DATABASE_URL is the Supabase Session-pooler
+// connection string (IPv4, port 5432) — works for both runtime and migrations.
 
 generator client {
   provider = "prisma-client"
@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // A fish supplier (one Excel sheet in HL SUPPLIER MASTER.xlsx)

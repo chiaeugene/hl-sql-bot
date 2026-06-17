@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
 import { isAuthenticated } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { parseInvoice, type SupportedMedia } from "@/lib/anthropic";
 import { matchSupplier } from "@/lib/match";
 import { resolveLines } from "@/lib/resolve";
-import { uploadDir } from "@/lib/uploads";
+import { uploadInvoiceFile } from "@/lib/storage";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -43,19 +41,15 @@ export async function POST(request: Request) {
   const bytes = Buffer.from(await file.arrayBuffer());
   const base64 = bytes.toString("base64");
 
-  // Persist the upload so the reviewer can see the original next to the table.
+  // Persist the upload to Supabase Storage so the reviewer can see the original
+  // next to the table — and so it survives redeploys.
   const id = randomUUID();
   const ext = file.name.includes(".") ? file.name.split(".").pop() : "bin";
-  const fileName = `${id}.${ext}`;
-  const dir = uploadDir();
+  const objectName = `${id}.${ext}`;
   let fileUrl: string | null = null;
-  try {
-    await mkdir(dir, { recursive: true });
-    await writeFile(path.join(dir, fileName), bytes);
-    fileUrl = `/uploads/${fileName}`; // served by src/app/uploads/[name]/route.ts
-  } catch {
-    fileUrl = null; // non-fatal — parsing still works
-  }
+  const stored = await uploadInvoiceFile(objectName, bytes, file.type);
+  // served by src/app/uploads/[name]/route.ts (auth-gated, streams from Supabase)
+  if (stored) fileUrl = `/uploads/${objectName}`;
 
   // Known suppliers help the model identify the letterhead.
   const suppliers = await prisma.supplier.findMany({

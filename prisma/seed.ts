@@ -1,13 +1,11 @@
 import path from "node:path";
 import "dotenv/config";
 import * as XLSX from "xlsx";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { normalizeText } from "../src/lib/normalize";
 
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? "file:./dev.db",
-});
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 const MASTER_FILE = path.join(process.cwd(), "data", "HL SUPPLIER MASTER.xlsx");
