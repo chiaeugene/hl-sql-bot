@@ -119,8 +119,14 @@ export default function BatchEditor({
   }
 
   function exportLines(inv: BatchInvoice): ExportLine[] {
+    const items = inv.supplierId ? itemsBySupplier[inv.supplierId] ?? [] : [];
     return inv.lines.map((l) => ({
       matchedCode: l.matchedCode,
+      // Use the Hock Lee master description for the matched code, not the invoice wording.
+      matchedDescription:
+        items.find(
+          (it) => it.id === l.matchedItemId || it.code === l.matchedCode
+        )?.description ?? null,
       rawDescription: l.rawDescription,
       qty: l.qty,
       uom: l.uom,

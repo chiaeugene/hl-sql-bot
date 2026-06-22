@@ -14,6 +14,9 @@ export const SQL_COLUMNS = [
 
 export type ExportLine = {
   matchedCode: string | null;
+  // The Hock Lee master-code description (what SQL Account should show). Falls
+  // back to the raw invoice wording only when the line has no matched code yet.
+  matchedDescription?: string | null;
   rawDescription: string;
   qty: number;
   uom: string;
@@ -29,9 +32,12 @@ function num(n: number): number {
 
 /** A row as an array of cells in canonical column order (numbers stay numbers). */
 export function toRow(line: ExportLine): (string | number)[] {
+  // Prefer the master-code description; fall back to invoice wording if unmatched.
+  const description =
+    (line.matchedCode ? line.matchedDescription : null) ?? line.rawDescription ?? "";
   return [
     line.matchedCode ?? "",
-    line.rawDescription ?? "",
+    description,
     num(line.qty),
     line.uom || "KG",
     num(line.unitPrice),
